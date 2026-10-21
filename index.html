@@ -27,41 +27,51 @@
             color: #333;
         }
         .input-group {
-            margin-bottom: 12px;
+            margin-bottom: 18px;
             text-align: left;
         }
+        .label-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
         label {
-            display: block;
-            margin-bottom: 4px;
             font-size: 14px;
             color: #555;
+            font-weight: bold;
         }
-        input {
-            width: 100%;
-            padding: 9px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 15px;
-        }
-        button {
-            width: 100%;
-            padding: 11px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+        .value-display {
             font-size: 16px;
             font-weight: bold;
-            margin-top: 5px;
+            color: #007bff;
         }
-        button:hover {
-            background-color: #0056b3;
+        /* 슬라이더(다이얼) 스타일 */
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border-radius: 5px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background 0.2s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #0056b3;
         }
         #result {
             margin-top: 15px;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: bold;
         }
         /* BMI 표 스타일 */
@@ -80,7 +90,7 @@
             background-color: #f8f9fa;
             color: #333;
         }
-        /* 결과에 해당하는 행 강조 스타일 */
+        /* 결과 강조 스타일 */
         .highlight-under { background-color: #e0f7fa !important; font-weight: bold; }
         .highlight-normal { background-color: #e8f5e9 !important; font-weight: bold; }
         .highlight-over { background-color: #fffde7 !important; font-weight: bold; }
@@ -90,15 +100,25 @@
 <body>
     <div class="card">
         <h2>BMI 계산기</h2>
+        
+        <!-- 키 슬라이더 -->
         <div class="input-group">
-            <label for="height">키 (cm)</label>
-            <input type="number" id="height" placeholder="예: 175">
+            <div class="label-container">
+                <label for="height">키</label>
+                <span class="value-display"><span id="heightVal">170</span> cm</span>
+            </div>
+            <input type="range" id="height" min="100" max="220" value="170" step="1" oninput="calculateBMI()">
         </div>
+
+        <!-- 체중 슬라이더 -->
         <div class="input-group">
-            <label for="weight">체중 (kg)</label>
-            <input type="number" id="weight" placeholder="예: 70">
+            <div class="label-container">
+                <label for="weight">체중</label>
+                <span class="value-display"><span id="weightVal">65</span> kg</span>
+            </div>
+            <input type="range" id="weight" min="30" max="150" value="65" step="0.5" oninput="calculateBMI()">
         </div>
-        <button onclick="calculateBMI()">계산하기</button>
+
         <div id="result"></div>
 
         <!-- BMI 단계 표 -->
@@ -134,6 +154,11 @@
         function calculateBMI() {
             const heightInput = document.getElementById('height').value;
             const weightInput = document.getElementById('weight').value;
+            
+            // 화면에 선택된 숫자 실시간 반영
+            document.getElementById('heightVal').innerText = heightInput;
+            document.getElementById('weightVal').innerText = weightInput;
+
             const resultDiv = document.getElementById('result');
 
             // 모든 행의 강조 스타일 초기화
@@ -141,20 +166,8 @@
                 tr.className = '';
             });
 
-            if (!heightInput || !weightInput) {
-                resultDiv.innerHTML = "키와 체중을 모두 입력해주세요.";
-                resultDiv.style.color = "red";
-                return;
-            }
-
             const height = parseFloat(heightInput) / 100; // cm -> m
             const weight = parseFloat(weightInput);
-
-            if (height <= 0 || weight <= 0) {
-                resultDiv.innerHTML = "올바른 값을 입력해주세요.";
-                resultDiv.style.color = "red";
-                return;
-            }
 
             const bmi = (weight / (height * height)).toFixed(1);
             let category = "";
@@ -190,6 +203,9 @@
             resultDiv.innerHTML = `BMI 지수: ${bmi} (${category})`;
             resultDiv.style.color = color;
         }
+
+        // 페이지가 처음 로드될 때 기본값으로 한 번 계산 실행
+        window.onload = calculateBMI;
     </script>
 </body>
 </html>
