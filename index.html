@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>BMI 계산기</title>
     <style>
         body {
@@ -13,67 +13,86 @@
             min-height: 100vh;
             background-color: #f0f2f5;
             margin: 0;
+            user-select: none;
         }
         .card {
             background: white;
             padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            width: 340px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            width: 360px;
             text-align: center;
         }
         h2 {
             margin-top: 0;
             color: #333;
+            margin-bottom: 20px;
         }
-        .input-group {
-            margin-bottom: 18px;
-            text-align: left;
-        }
-        .label-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        label {
+        .section-title {
             font-size: 14px;
             color: #555;
             font-weight: bold;
+            text-align: left;
+            margin-bottom: 8px;
         }
-        .value-display {
-            font-size: 16px;
-            font-weight: bold;
+        /* 다이얼 박스 컨테이너 */
+        .dial-container {
+            display: flex;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 10px;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .dial-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        .dial-btn {
+            background: #ffffff;
+            border: 1px solid #ccc;
             color: #007bff;
-        }
-        /* 슬라이더(다이얼) 스타일 */
-        input[type="range"] {
+            font-size: 18px;
+            font-weight: bold;
             width: 100%;
-            height: 8px;
-            background: #ddd;
-            border-radius: 5px;
-            outline: none;
-            appearance: none;
+            height: 36px;
+            border-radius: 6px;
             cursor: pointer;
+            transition: background 0.1s;
         }
-        input[type="range"]::-webkit-slider-thumb {
-            appearance: none;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
+        .dial-btn:active {
             background: #007bff;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: background 0.2s;
+            color: white;
         }
-        input[type="range"]::-webkit-slider-thumb:hover {
-            background: #0056b3;
+        .dial-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin: 8px 0;
         }
+        .dial-unit {
+            font-size: 12px;
+            color: #777;
+            margin-top: 2px;
+        }
+        .divider {
+            font-size: 22px;
+            font-weight: bold;
+            color: #aaa;
+            margin: 0 5px;
+            padding-bottom: 20px;
+        }
+
         #result {
             margin-top: 15px;
             font-size: 16px;
             font-weight: bold;
         }
+
         /* BMI 표 스타일 */
         .bmi-table {
             width: 100%;
@@ -99,24 +118,46 @@
 </head>
 <body>
     <div class="card">
-        <h2>BMI 계산기</h2>
+        <h2>BMI 다이얼 계산기</h2>
         
-        <!-- 키 슬라이더 -->
-        <div class="input-group">
-            <div class="label-container">
-                <label for="height">키</label>
-                <span class="value-display"><span id="heightVal">170</span> cm</span>
+        <!-- 키 다이얼 -->
+        <div class="section-title">키 (Height)</div>
+        <div class="dial-container">
+            <!-- 정수부 (1단위) -->
+            <div class="dial-group">
+                <button class="dial-btn" onclick="adjust('hInt', 1)">▲</button>
+                <div class="dial-value" id="hIntVal">170</div>
+                <button class="dial-btn" onclick="adjust('hInt', -1)">▼</button>
+                <div class="dial-unit">정수 (cm)</div>
             </div>
-            <input type="range" id="height" min="100" max="220" value="170" step="1" oninput="calculateBMI()">
+            <div class="divider">.</div>
+            <!-- 소수부 (0.01단위) -->
+            <div class="dial-group">
+                <button class="dial-btn" onclick="adjust('hDec', 1)">▲</button>
+                <div class="dial-value" id="hDecVal">00</div>
+                <button class="dial-btn" onclick="adjust('hDec', -1)">▼</button>
+                <div class="dial-unit">소수 (0.01)</div>
+            </div>
         </div>
 
-        <!-- 체중 슬라이더 -->
-        <div class="input-group">
-            <div class="label-container">
-                <label for="weight">체중</label>
-                <span class="value-display"><span id="weightVal">65</span> kg</span>
+        <!-- 체중 다이얼 -->
+        <div class="section-title">체중 (Weight)</div>
+        <div class="dial-container">
+            <!-- 정수부 (1단위) -->
+            <div class="dial-group">
+                <button class="dial-btn" onclick="adjust('wInt', 1)">▲</button>
+                <div class="dial-value" id="wIntVal">65</div>
+                <button class="dial-btn" onclick="adjust('wInt', -1)">▼</button>
+                <div class="dial-unit">정수 (kg)</div>
             </div>
-            <input type="range" id="weight" min="30" max="150" value="65" step="0.5" oninput="calculateBMI()">
+            <div class="divider">.</div>
+            <!-- 소수부 (0.01단위) -->
+            <div class="dial-group">
+                <button class="dial-btn" onclick="adjust('wDec', 1)">▲</button>
+                <div class="dial-value" id="wDecVal">00</div>
+                <button class="dial-btn" onclick="adjust('wDec', -1)">▼</button>
+                <div class="dial-unit">소수 (0.01)</div>
+            </div>
         </div>
 
         <div id="result"></div>
@@ -151,23 +192,54 @@
     </div>
 
     <script>
-        function calculateBMI() {
-            const heightInput = document.getElementById('height').value;
-            const weightInput = document.getElementById('weight').value;
-            
-            // 화면에 선택된 숫자 실시간 반영
-            document.getElementById('heightVal').innerText = heightInput;
-            document.getElementById('weightVal').innerText = weightInput;
+        // 초기값 설정 (키 170.00, 체중 65.00)
+        let state = {
+            hInt: 170,
+            hDec: 0,
+            wInt: 65,
+            wDec: 0
+        };
 
+        function adjust(target, amount) {
+            if (target === 'hInt') {
+                state.hInt += amount;
+                if (state.hInt < 100) state.hInt = 100;
+                if (state.hInt > 220) state.hInt = 220;
+            } else if (target === 'hDec') {
+                state.hDec += amount;
+                if (state.hDec > 99) { state.hDec = 0; state.hInt++; }
+                if (state.hDec < 0) { state.hDec = 99; state.hInt--; }
+            } else if (target === 'wInt') {
+                state.wInt += amount;
+                if (state.wInt < 20) state.wInt = 20;
+                if (state.wInt > 200) state.wInt = 200;
+            } else if (target === 'wDec') {
+                state.wDec += amount;
+                if (state.wDec > 99) { state.wDec = 0; state.wInt++; }
+                if (state.wDec < 0) { state.wDec = 99; state.wInt--; }
+            }
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            // 화면 값 갱신 (소수점 자릿수 2자리 맞춤)
+            document.getElementById('hIntVal').innerText = state.hInt;
+            document.getElementById('hDecVal').innerText = String(state.hDec).padStart(2, '0');
+            document.getElementById('wIntVal').innerText = state.wInt;
+            document.getElementById('wDecVal').innerText = String(state.wDec).padStart(2, '0');
+
+            calculateBMI();
+        }
+
+        function calculateBMI() {
+            const height = (state.hInt + state.hDec / 100) / 100; // cm -> m
+            const weight = state.wInt + state.wDec / 100;
             const resultDiv = document.getElementById('result');
 
             // 모든 행의 강조 스타일 초기화
             document.querySelectorAll('.bmi-table tr').forEach(tr => {
                 tr.className = '';
             });
-
-            const height = parseFloat(heightInput) / 100; // cm -> m
-            const weight = parseFloat(weightInput);
 
             const bmi = (weight / (height * height)).toFixed(1);
             let category = "";
@@ -204,8 +276,8 @@
             resultDiv.style.color = color;
         }
 
-        // 페이지가 처음 로드될 때 기본값으로 한 번 계산 실행
-        window.onload = calculateBMI;
+        // 최초 실행
+        window.onload = updateDisplay;
     </script>
 </body>
 </html>
